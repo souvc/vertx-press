@@ -1,5 +1,6 @@
 package io.vertPress.manage;
 
+import io.vertPress.manage.init.InitDatabase;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -53,12 +54,22 @@ public class ManageServer extends AbstractVerticle {
 
 	@Override
 	public void start() throws Exception {
-		Router router = Router.router(vertx); // 主路由
+		// 主路由
+		Router router = Router.router(vertx);
 		
-		Router restAPI = Router.router(vertx); // 子路由
-		router.mountSubRouter("/manage", restAPI);
-
-		LOGGER.info("ManageServer is running.");
+		// 子路由 - 初始化数据库
+		Router initRouter = Router.router(vertx);
+		initRouter.get("/database").handler(new InitDatabase()::handleGetProduct);
+		
+		// 子路由 - 管理服务
+		Router manageRouter = Router.router(vertx);
+		
+		// 设置子路由到主路由
+		router.mountSubRouter("/init", initRouter);
+		router.mountSubRouter("/manage", manageRouter);
+		
+		LOGGER.debug("ManageServer is running.");
+		// 启动服务
 		vertx.createHttpServer().requestHandler(router::accept).listen(SERVER_PORT);
 	}
 }
