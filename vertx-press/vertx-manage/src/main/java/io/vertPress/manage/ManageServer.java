@@ -5,6 +5,9 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.asyncsql.AsyncSQLClient;
+import io.vertx.ext.asyncsql.MySQLClient;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 
 /**
@@ -20,12 +23,14 @@ public class ManageServer extends AbstractVerticle {
 	 * @Fields LOGGER : 日志对象
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(ManageServer.class);
-	
+
 	/**
 	 * @Fields MYSQL : 数据库对象
 	 */
 	private static JsonObject MYSQL = null;
-	
+
+	private static AsyncSQLClient sqlClient = null;
+
 	private final static int SERVER_PORT = 8080;
 
 	private final static String DB_HOST = "127.0.0.1";
@@ -40,15 +45,9 @@ public class ManageServer extends AbstractVerticle {
 	static {
 		// 初始化数据库链接对象
 		if (MYSQL == null) {
-			MYSQL = new JsonObject()
-					.put("host", DB_HOST)
-					.put("port", DB_PROT)
-					.put("maxPoolSize", DB_MAX_POOL_SIZE)
-					.put("username", DB_USERNAME)
-					.put("password", DB_PASSWORD)
-					.put("database", DB_DATABASE)
-					.put("charset", DB_CHARSET)
-					.put("queryTimeout", DB_QUERY_TIMEOUT);
+			MYSQL = new JsonObject().put("host", DB_HOST).put("port", DB_PROT).put("maxPoolSize", DB_MAX_POOL_SIZE)
+					.put("username", DB_USERNAME).put("password", DB_PASSWORD).put("database", DB_DATABASE)
+					.put("charset", DB_CHARSET).put("queryTimeout", DB_QUERY_TIMEOUT);
 		}
 	}
 
@@ -56,18 +55,39 @@ public class ManageServer extends AbstractVerticle {
 	public void start() throws Exception {
 		// 主路由
 		Router router = Router.router(vertx);
-		
+
+		// 初始化数据库对象
+		sqlClient = MySQLClient.createShared(vertx, MYSQL);
+
+		router.route("/products*").handler(routingContext -> sqlClient.getConnection(res -> {
+			if (res.failed()) {
+				routingContext.fail(res.cause());
+			} else {
+				SQLConnection conn = res.result();
+				routingContext.put("conn", conn);
+				routingContext.addHeadersEndHandler(done -> conn.close(v -> {
+				}));
+				routingContext.next();
+			}
+		})).failureHandler(routingContext -> {
+			SQLConnection conn = routingContext.get("conn");
+			if (conn != null) {
+				conn.close(v -> {
+				});
+			}
+		});
+
 		// 子路由 - 初始化数据库
 		Router initRouter = Router.router(vertx);
 		initRouter.get("/database").handler(new InitDatabase()::handleGetProduct);
-		
+
 		// 子路由 - 管理服务
 		Router manageRouter = Router.router(vertx);
-		
+
 		// 设置子路由到主路由
 		router.mountSubRouter("/init", initRouter);
 		router.mountSubRouter("/manage", manageRouter);
-		
+
 		LOGGER.debug("ManageServer is running.");
 		// 启动服务
 		vertx.createHttpServer().requestHandler(router::accept).listen(SERVER_PORT);
