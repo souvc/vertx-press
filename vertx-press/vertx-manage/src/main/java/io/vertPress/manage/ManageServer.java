@@ -65,7 +65,7 @@ public class ManageServer extends AbstractVerticle {
 		// 初始化数据库对象
 		sqlClient = MySQLClient.createShared(vertx, MYSQL);
 
-		router.route("/products*").handler(routingContext -> sqlClient.getConnection(res -> {
+		router.route("/init/*").handler(routingContext -> sqlClient.getConnection(res -> {
 			if (res.failed()) {
 				routingContext.fail(res.cause());
 			} else {
