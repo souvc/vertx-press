@@ -45,9 +45,15 @@ public class ManageServer extends AbstractVerticle {
 	static {
 		// 初始化数据库链接对象
 		if (MYSQL == null) {
-			MYSQL = new JsonObject().put("host", DB_HOST).put("port", DB_PROT).put("maxPoolSize", DB_MAX_POOL_SIZE)
-					.put("username", DB_USERNAME).put("password", DB_PASSWORD).put("database", DB_DATABASE)
-					.put("charset", DB_CHARSET).put("queryTimeout", DB_QUERY_TIMEOUT);
+			MYSQL = new JsonObject()
+					.put("host", DB_HOST)
+					.put("port", DB_PROT)
+					.put("maxPoolSize", DB_MAX_POOL_SIZE)
+					.put("username", DB_USERNAME)
+					.put("password", DB_PASSWORD)
+					.put("database", DB_DATABASE)
+					.put("charset", DB_CHARSET)
+					.put("queryTimeout", DB_QUERY_TIMEOUT);
 		}
 	}
 
