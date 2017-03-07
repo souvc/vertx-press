@@ -98,4 +98,5 @@ public class ManageServer extends AbstractVerticle {
 		// 启动服务
 		vertx.createHttpServer().requestHandler(router::accept).listen(SERVER_PORT);
 	}
+
 }
