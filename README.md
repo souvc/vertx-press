@@ -12,3 +12,11 @@
 	1. cd ../vertx-press
 	2. mvn clean install
 	3. vertx run io.vertPress.manage.ManageServer -cp vertx-manage/target/vertx-manage-0.0.1.jar
+
+### 初始化模块
+
+1. 初始化数据库表
+
+	浏览器打开 http://localhost:8080/init/database
+		
+	成功则返回 `Initialize the database successfully!`
