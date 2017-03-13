@@ -1,5 +1,6 @@
 package io.vertPress.manage;
 
+import io.vertPress.manage.auth.AuthHandle;
 import io.vertPress.manage.init.InitDatabase;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
@@ -71,17 +72,10 @@ public class ManageServer extends AbstractVerticle {
 	public void start() throws Exception {
 		// 主路由
 		Router router = Router.router(vertx);
-		
-		// 缓存
-		router.route().handler(CookieHandler.create());
-		router.route().handler(BodyHandler.create());
-		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
-		
 		// 初始化数据库对象
 		sqlClient = MySQLClient.createShared(vertx, MYSQL);
-
-		router.route("/init/*").handler(routingContext -> sqlClient.getConnection(res -> {
+		router.route().handler(routingContext -> sqlClient.getConnection(res -> {
 			if (res.failed()) {
 				routingContext.fail(res.cause());
 			} else {
@@ -99,13 +93,20 @@ public class ManageServer extends AbstractVerticle {
 			}
 		});
 
-		// 子路由 - 初始化数据库
+		/**
+		 * 初始化路由 - 数据库
+		 * */
 		Router initRouter = Router.router(vertx);
 		initRouter.get("/database").handler(new InitDatabase()::handleGetProduct);
-
-		// 子路由 - 管理服务
+		router.mountSubRouter("/init", initRouter);
+				
+		/**
+		 * 管理端路由
+		 * */
 		Router manageRouter = Router.router(vertx);
-
+		manageRouter.route().handler(CookieHandler.create());
+		manageRouter.route().handler(BodyHandler.create());
+		manageRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 		manageRouter.route().handler(routingContext -> {
 			routingContext.put("name", "Vert.x Web");
 			ENGINE.render(routingContext, "templates/index.ftl", res -> {
@@ -116,11 +117,9 @@ public class ManageServer extends AbstractVerticle {
 				}
 			});
 		});
-
-		// 设置子路由到主路由
-		router.mountSubRouter("/init", initRouter);
+		manageRouter.route("/private/*").handler(new AuthHandle()::handleGetProduct);
 		router.mountSubRouter("/manage", manageRouter);
-		
+
 		LOGGER.debug("ManageServer is running.");
 		// 启动服务
 		vertx.createHttpServer().requestHandler(router::accept).listen(SERVER_PORT);
