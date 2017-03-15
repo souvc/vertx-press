@@ -1,7 +1,8 @@
 package io.vertPress.manage;
 
-import io.vertPress.manage.auth.AuthHandle;
+import io.vertPress.manage.handle.RedirectAuthHandler;
 import io.vertPress.manage.init.InitDatabase;
+import io.vertPress.manage.utils.ResultUtil;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -14,7 +15,6 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.SessionHandler;
 import io.vertx.ext.web.sstore.LocalSessionStore;
-import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
 
 /**
  * @ClassName: ManageServer
@@ -30,11 +30,6 @@ public class ManageServer extends AbstractVerticle {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(ManageServer.class);
 	
-	/**
-	 * @Fields ENGINE : 模版引擎
-	 */
-	private final static FreeMarkerTemplateEngine ENGINE = FreeMarkerTemplateEngine.create();
-
 	/**
 	 * @Fields MYSQL : 数据库对象
 	 */
@@ -83,7 +78,6 @@ public class ManageServer extends AbstractVerticle {
 				routingContext.put("conn", conn);
 				routingContext.addHeadersEndHandler(done -> conn.close(v -> {
 				}));
-				routingContext.next();
 			}
 		})).failureHandler(routingContext -> {
 			SQLConnection conn = routingContext.get("conn");
@@ -109,15 +103,9 @@ public class ManageServer extends AbstractVerticle {
 		manageRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 		manageRouter.route().handler(routingContext -> {
 			routingContext.put("name", "Vert.x Web");
-			ENGINE.render(routingContext, "templates/index.ftl", res -> {
-				if (res.succeeded()) {
-					routingContext.response().end(res.result());
-				} else {
-					routingContext.fail(res.cause());
-				}
-			});
+			ResultUtil.redirectURL(routingContext, "templates/index.ftl");
 		});
-		manageRouter.route("/private/*").handler(new AuthHandle()::handleGetProduct);
+		manageRouter.route("/private/*").handler(RedirectAuthHandler.check("templates/index.ftl"));
 		router.mountSubRouter("/manage", manageRouter);
 
 		LOGGER.debug("ManageServer is running.");

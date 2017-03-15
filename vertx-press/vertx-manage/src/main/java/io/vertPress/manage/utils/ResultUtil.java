@@ -1,6 +1,8 @@
 package io.vertPress.manage.utils;
 
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
 
 /**
  * @ClassName: ResultUtil
@@ -10,6 +12,11 @@ import io.vertx.core.http.HttpServerResponse;
  * 
  */
 public final class ResultUtil {
+	
+	/**
+	 * @Fields ENGINE : TODO 模版引擎
+	 */
+	private final static FreeMarkerTemplateEngine ENGINE = FreeMarkerTemplateEngine.create();
 
 	/**
 	 * @Title: sendError
@@ -33,6 +40,24 @@ public final class ResultUtil {
 	 */
 	public static void sendJSON(String result, HttpServerResponse response) {
 		response.putHeader("content-type", "application/json").end(result);
+	}
+	
+	/**
+	 * @Title: redirectURL
+	 * @Description: TODO 跳转页面
+	 * @param @param event
+	 * @param @param redirectURL
+	 * @return void
+	 * @throws
+	 */
+	public static void redirectURL(RoutingContext event, String redirectURL) {
+		ENGINE.render(event, redirectURL, res -> {
+			if (res.succeeded()) {
+				event.response().end(res.result());
+			} else {
+				event.fail(res.cause());
+			}
+		});
 	}
 	
 }
