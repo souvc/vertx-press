@@ -17,6 +17,6 @@
 
 1. 初始化数据库表
 
-	浏览器打开 http://localhost:8080/init/database
-		
-	成功则返回 `Initialize the database successfully!`
+	管理员账号：admin
+	
+	管理员密码：cxj123
