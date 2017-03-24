@@ -1,11 +1,8 @@
 package io.vertPress.manage.init;
 
-import io.vertPress.manage.utils.ResultUtil;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.SQLConnection;
-import io.vertx.ext.web.RoutingContext;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @ClassName: InitDataBase
@@ -14,12 +11,7 @@ import io.vertx.ext.web.RoutingContext;
  * @date 2017年2月26日 下午4:20:07
  * 
  */
-public class InitDatabase {
-	
-	/**
-	 * @Fields LOGGER : 日志对象
-	 */
-	private final static Logger LOGGER = LoggerFactory.getLogger(InitDatabase.class);
+public final class InitDatabase {
 
 	/**
 	 * @Fields WP_COMMENTMETA_SQL : TODO 创建 wp_commentmeta 表
@@ -76,85 +68,52 @@ public class InitDatabase {
 	 */
 	private final static String WP_USERS_SQL = "CREATE TABLE IF NOT EXISTS wp_users (id bigint(20) NOT NULL AUTO_INCREMENT,user_login VARCHAR(60) DEFAULT NULL,user_pass VARCHAR(64) DEFAULT NULL,user_nicename VARCHAR(50) DEFAULT NULL,user_email VARCHAR(100) DEFAULT NULL,user_url VARCHAR(100) DEFAULT NULL,user_registered DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, user_activation_key VARCHAR(60) DEFAULT NULL,user_status int(1) DEFAULT 0,PRIMARY KEY (id)) ENGINE=InnoDB";
 
-	public void handleGetProduct(RoutingContext routingContext) {
-		HttpServerResponse response = routingContext.response();
-		SQLConnection conn = routingContext.get("conn");
-		conn.execute(WP_COMMENTMETA_SQL, ddl1 -> {
-			if (ddl1.failed()) {
-				throw new RuntimeException(ddl1.cause());
-			} else {
-				conn.execute(WP_COMMENTS_SQL, ddl2 -> {
-					if (ddl2.failed()) {
-						throw new RuntimeException(ddl2.cause());
-					} else {
-						conn.execute(WP_LINKS_SQL, ddl3 -> {
-							if (ddl3.failed()) {
-								throw new RuntimeException(ddl3.cause());
-							} else {
-								conn.execute(WP_OPTIONS_SQL, ddl4 -> {
-									if (ddl4.failed()) {
-										throw new RuntimeException(ddl4.cause());
-									} else {
-										conn.execute(WP_POSTMETA_SQL, ddl5 -> {
-											if (ddl5.failed()) {
-												throw new RuntimeException(ddl5.cause());
-											} else {
-												conn.execute(WP_POSTS_SQL, ddl6 -> {
-													if (ddl6.failed()) {
-														throw new RuntimeException(ddl6.cause());
-													} else {
-														conn.execute(WP_TERMS_SQL, ddl7 -> {
-															if (ddl7.failed()) {
-																throw new RuntimeException(ddl7.cause());
-															} else {
-																conn.execute(WP_TERM_TAXONOMY_SQL, ddl8 -> {
-																	if (ddl8.failed()) {
-																		throw new RuntimeException(ddl8.cause());
-																	} else {
-																		conn.execute(WP_TERM_RELATIONSHIPS_SQL,
-																				ddl9 -> {
-																					if (ddl9.failed()) {
-																						throw new RuntimeException(
-																								ddl9.cause());
-																					} else {
-																						conn.execute(WP_USERMETA_SQL,
-																								ddl10 -> {
-																									if (ddl9.failed()) {
-																										throw new RuntimeException(
-																												ddl9.cause());
-																									} else {
-																										conn.execute(
-																												WP_USERS_SQL,
-																												ddl11 -> {
-																													if (ddl11
-																															.failed()) {
-																														throw new RuntimeException(
-																																ddl11.cause());
-																													} else {
-																														LOGGER.info("Database is Init.");
-																													}
-																												});
-																									}
-																								});
-																					}
-																				});
-																	}
-																});
-															}
-														});
-													}
-												});
-											}
-										});
-									}
-								});
-							}
-						});
-					}
-				});
-			}
-		});
-		ResultUtil.sendJSON("Initialize the database successfully!", response);
+	private Connection conn;
+
+	public final void setUpInitialData() throws Exception {
+		conn = DatabaseUtil.getConn();
+		executeStatement(WP_COMMENTMETA_SQL);
+		executeStatement(WP_COMMENTS_SQL);
+		executeStatement(WP_LINKS_SQL);
+		executeStatement(WP_OPTIONS_SQL);
+		executeStatement(WP_POSTMETA_SQL);
+		executeStatement(WP_POSTS_SQL);
+		executeStatement(WP_TERMS_SQL);
+		executeStatement(WP_TERM_TAXONOMY_SQL);
+		executeStatement(WP_TERM_RELATIONSHIPS_SQL);
+		executeStatement(WP_USERMETA_SQL);
+		executeStatement(WP_USERS_SQL);
+		
+		ResultSet result = queryStatement("select a.* from wp_users a where a.user_login = 'admin'");
+		System.out.println(result);
+		if (!result.next()) {
+			executeStatement("insert into wp_users(`user_login`, `user_pass`, `user_nicename`, `user_status`) values('admin', 'cxj123', '管理员', 1)");
+		}
+	}
+
+	/**
+	 * @Title: executeStatement
+	 * @Description: TODO 执行
+	 * @param @param sql
+	 * @param @throws SQLException
+	 * @return void
+	 * @throws
+	 */
+	private void executeStatement(String sql) throws SQLException {
+		conn.createStatement().execute(sql);
+	}
+	
+	/**
+	 * @Title: queryStatement
+	 * @Description: TODO 查询
+	 * @param @param sql
+	 * @param @return
+	 * @param @throws SQLException
+	 * @return ResultSet
+	 * @throws
+	 */
+	private ResultSet queryStatement(String sql) throws SQLException {
+		return conn.createStatement().executeQuery(sql);
 	}
 
 }

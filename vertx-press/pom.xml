@@ -70,6 +70,11 @@
 			</dependency>
 			<dependency>
 				<groupId>io.vertx</groupId>
+				<artifactId>vertx-jdbc-client</artifactId>
+				<version>${vertx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.vertx</groupId>
 				<artifactId>vertx-mysql-postgresql-client</artifactId>
 				<version>${vertx.version}</version>
 			</dependency>
@@ -106,6 +111,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>3.5</version>
+			</dependency>
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>6.0.6</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

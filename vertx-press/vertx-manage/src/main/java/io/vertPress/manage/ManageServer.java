@@ -1,10 +1,10 @@
 package io.vertPress.manage;
 
 import io.vertPress.manage.handle.RedirectAuthHandler;
+import io.vertPress.manage.init.DatabaseUtil;
 import io.vertPress.manage.init.InitDatabase;
 import io.vertPress.manage.utils.ResultUtil;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
@@ -30,46 +30,19 @@ public class ManageServer extends AbstractVerticle {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(ManageServer.class);
 	
-	/**
-	 * @Fields MYSQL : 数据库对象
-	 */
-	private static JsonObject MYSQL = null;
-
 	private static AsyncSQLClient sqlClient = null;
 
 	private final static int SERVER_PORT = 8080;
 
-	private final static String DB_HOST = "127.0.0.1";
-	private final static int DB_PROT = 3306;
-	private final static int DB_MAX_POOL_SIZE = 10;
-	private final static String DB_USERNAME = "root";
-	private final static String DB_PASSWORD = "cxj123";
-	private final static String DB_DATABASE = "vertx-press";
-	private final static String DB_CHARSET = "UTF-8";
-	private final static int DB_QUERY_TIMEOUT = 10000;
-
-	static {
-		// 初始化数据库链接对象
-		if (MYSQL == null) {
-			MYSQL = new JsonObject()
-					.put("host", DB_HOST)
-					.put("port", DB_PROT)
-					.put("maxPoolSize", DB_MAX_POOL_SIZE)
-					.put("username", DB_USERNAME)
-					.put("password", DB_PASSWORD)
-					.put("database", DB_DATABASE)
-					.put("charset", DB_CHARSET)
-					.put("queryTimeout", DB_QUERY_TIMEOUT);
-		}
-	}
-
 	@Override
 	public void start() throws Exception {
+		// 初始化数据
+		new InitDatabase().setUpInitialData();
+		
 		// 主路由
 		Router router = Router.router(vertx);
-
 		// 初始化数据库对象
-		sqlClient = MySQLClient.createShared(vertx, MYSQL);
+		sqlClient = MySQLClient.createShared(vertx, DatabaseUtil.getJsonObject());
 		router.route().handler(routingContext -> sqlClient.getConnection(res -> {
 			if (res.failed()) {
 				routingContext.fail(res.cause());
@@ -87,13 +60,6 @@ public class ManageServer extends AbstractVerticle {
 			}
 		});
 
-		/**
-		 * 初始化路由 - 数据库
-		 * */
-		Router initRouter = Router.router(vertx);
-		initRouter.get("/database").handler(new InitDatabase()::handleGetProduct);
-		router.mountSubRouter("/init", initRouter);
-				
 		/**
 		 * 管理端路由
 		 * */
