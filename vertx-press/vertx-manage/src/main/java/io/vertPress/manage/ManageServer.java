@@ -9,7 +9,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.MySQLClient;
-import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
@@ -29,8 +28,6 @@ public class ManageServer extends AbstractVerticle {
 	 * @Fields LOGGER : 日志对象
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(ManageServer.class);
-	
-	private static AsyncSQLClient sqlClient = null;
 
 	private final static int SERVER_PORT = 8080;
 
@@ -38,41 +35,42 @@ public class ManageServer extends AbstractVerticle {
 	public void start() throws Exception {
 		// 初始化数据
 		new InitDatabase().setUpInitialData();
-		
+
 		// 主路由
 		Router router = Router.router(vertx);
-		// 初始化数据库对象
-		sqlClient = MySQLClient.createShared(vertx, DatabaseUtil.getJsonObject());
-		router.route().handler(routingContext -> sqlClient.getConnection(res -> {
-			if (res.failed()) {
-				routingContext.fail(res.cause());
-			} else {
-				SQLConnection conn = res.result();
-				routingContext.put("conn", conn);
-				routingContext.addHeadersEndHandler(done -> conn.close(v -> {
-				}));
-			}
-		})).failureHandler(routingContext -> {
-			SQLConnection conn = routingContext.get("conn");
-			if (conn != null) {
-				conn.close(v -> {
-				});
-			}
-		});
 
-		/**
-		 * 管理端路由
-		 * */
+		// 初始化数据库对象
+		final AsyncSQLClient sqlClient = MySQLClient.createShared(vertx, DatabaseUtil.getJsonObject());
+		
+		// router.route("/").handler(rtc -> sqlClient.getConnection(res -> {
+		// if (res.failed()) {
+		// rtc.fail(res.cause());
+		// } else {
+		// SQLConnection conn = res.result();
+		// rtc.put("conn", conn);
+		// rtc.addHeadersEndHandler(done -> conn.close(v -> {
+		// }));
+		// }
+		// })).failureHandler(routingContext -> {
+		// SQLConnection conn = routingContext.get("conn");
+		// if (conn != null) {
+		// conn.close(v -> {
+		// });
+		// }
+		// });
+
+		// 管理请求
 		Router manageRouter = Router.router(vertx);
 		manageRouter.route().handler(CookieHandler.create());
 		manageRouter.route().handler(BodyHandler.create());
 		manageRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
-		manageRouter.route().handler(routingContext -> {
-			routingContext.put("name", "Vert.x Web");
-			ResultUtil.redirectURL(routingContext, "templates/index.ftl");
-		});
-		manageRouter.route("/private/*").handler(RedirectAuthHandler.check("templates/index.ftl"));
+		manageRouter.route().handler(RedirectAuthHandler.check("webroot/manage/login.html"));
 		router.mountSubRouter("/manage", manageRouter);
+
+		// 前端请求
+		router.route().handler(rct -> {
+			ResultUtil.redirectURL(rct, "webroot/view/index.ftl");
+		});
 
 		LOGGER.debug("ManageServer is running.");
 		// 启动服务

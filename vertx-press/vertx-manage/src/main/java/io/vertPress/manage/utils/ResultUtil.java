@@ -50,14 +50,18 @@ public final class ResultUtil {
 	 * @return void
 	 * @throws
 	 */
-	public static void redirectURL(RoutingContext event, String redirectURL) {
-		ENGINE.render(event, redirectURL, res -> {
-			if (res.succeeded()) {
-				event.response().end(res.result());
-			} else {
-				event.fail(res.cause());
-			}
-		});
+	public static void redirectURL(RoutingContext rct, String redirectURL) {
+		if (redirectURL.contains(".ftl")) {
+			ENGINE.render(rct, redirectURL, res -> {
+				if (res.succeeded()) {
+					rct.response().end(res.result());
+				} else {
+					rct.fail(res.cause());
+				}
+			});
+		} else {
+			rct.response().sendFile(redirectURL);
+		}
 	}
 	
 }

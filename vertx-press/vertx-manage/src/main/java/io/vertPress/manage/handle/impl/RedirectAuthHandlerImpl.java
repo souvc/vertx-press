@@ -2,7 +2,8 @@ package io.vertPress.manage.handle.impl;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.vertPress.manage.utils.ResultUtil;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
@@ -15,8 +16,14 @@ import io.vertx.ext.web.Session;
  */
 public class RedirectAuthHandlerImpl extends AuthHandlerImpl {
 
-	
+	/**
+	 * @Fields LOGGER : 日志对象
+	 */
+	private final static Logger LOGGER = LoggerFactory.getLogger(RedirectAuthHandlerImpl.class);
 
+	/**
+	 * @Fields loginRedirectURL : 返回登陆链接
+	 */
 	private final String loginRedirectURL;
 
 	public RedirectAuthHandlerImpl(String loginRedirectURL) {
@@ -28,10 +35,11 @@ public class RedirectAuthHandlerImpl extends AuthHandlerImpl {
 		Session session = event.session();
 		if (session != null) {
 			String userNo = session.get("userNo");
+			LOGGER.info("userNo:" + userNo);
 			if (StringUtils.isNotBlank(userNo)) {
 				event.next();
 			} else {
-				ResultUtil.redirectURL(event, loginRedirectURL);
+				event.response().putHeader("location", loginRedirectURL).setStatusCode(302).end();
 			}
 		} else {
 			event.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
