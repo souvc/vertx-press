@@ -2,6 +2,13 @@ package io.vertPress.manage.dto;
 
 import java.io.Serializable;
 
+/**
+ * @ClassName: UserDTO
+ * @Description: TODO 用户对象
+ * @author FoamValue foamvalue@live.cn
+ * @date 2017年3月29日 下午8:07:13
+ * 
+ */
 public class UserDTO implements Serializable {
 
 	private static final long serialVersionUID = -8203307196906807650L;

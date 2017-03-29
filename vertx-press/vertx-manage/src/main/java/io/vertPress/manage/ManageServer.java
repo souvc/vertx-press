@@ -1,5 +1,6 @@
 package io.vertPress.manage;
 
+import io.vertPress.manage.dto.ConstantDTO;
 import io.vertPress.manage.handle.LoginHandler;
 import io.vertPress.manage.handle.RedirectAuthHandler;
 import io.vertPress.manage.init.InitDatabase;
@@ -28,8 +29,6 @@ public class ManageServer extends AbstractVerticle {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(ManageServer.class);
 	
-	final static String DEFAULT_USER_SESSION_KEY = "_vertx_user_key";
-
 	private final static int SERVER_PORT = 8080;
 
 	@Override
@@ -54,7 +53,7 @@ public class ManageServer extends AbstractVerticle {
 		// Handles the actual logout
 		router.route("/logout").handler(context -> {
 			Session session = context.session();
-			session.remove(DEFAULT_USER_SESSION_KEY);
+			session.remove(ConstantDTO.DEFAULT_USER_SESSION_KEY);
 			context.response().putHeader("location", "/login.html").setStatusCode(302).end();
 		});
 

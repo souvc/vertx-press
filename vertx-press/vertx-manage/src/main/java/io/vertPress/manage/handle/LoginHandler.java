@@ -1,30 +1,25 @@
 package io.vertPress.manage.handle;
 
+import io.vertPress.manage.dto.ConstantDTO;
 import io.vertPress.manage.handle.impl.LoginHandlerImpl;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * @ClassName: LoginHandler
+ * @Description: TODO 登陆接口
+ * @author FoamValue foamvalue@live.cn
+ * @date 2017年3月29日 下午8:07:34
+ * 
+ */
 public interface LoginHandler extends Handler<RoutingContext> {
-	
-	final static String DEFAULT_USER_SESSION_KEY = "_vertx_user_key";
 
-	/**
-	 * @Fields DEFAULT_USERNAME_PARAM : 用户名
-	 */
 	String DEFAULT_USERNAME_PARAM = "userName";
 
-	/**
-	 * @Fields DEFAULT_PASSWORD_PARAM : 密码
-	 */
 	String DEFAULT_PASSWORD_PARAM = "password";
 
-	/**
-	 * @Fields DEFAULT_RETURN_URL_PARAM : 默认返回 url
-	 */
-	String DEFAULT_RETURN_URL_PARAM = "return_url";
-
 	static LoginHandler create() {
-		return new LoginHandlerImpl(DEFAULT_USERNAME_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, null);
+		return new LoginHandlerImpl(DEFAULT_USERNAME_PARAM, DEFAULT_PASSWORD_PARAM, ConstantDTO.DEFAULT_RETURN_URL_PARAM, null);
 	}
 
 	static LoginHandler create(String usernameParam, String passwordParam, String returnURLParam, String directLoggedInOKURL) {

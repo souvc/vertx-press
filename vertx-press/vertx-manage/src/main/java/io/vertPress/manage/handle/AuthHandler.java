@@ -12,5 +12,4 @@ import io.vertx.ext.web.RoutingContext;
  */
 public interface AuthHandler extends Handler<RoutingContext> {
 	
-	final static String DEFAULT_USER_SESSION_KEY = "_vertx_user_key";
 }

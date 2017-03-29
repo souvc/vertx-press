@@ -1,18 +1,26 @@
 package io.vertPress.manage.handle.impl;
 
+import io.vertPress.manage.dto.ConstantDTO;
 import io.vertPress.manage.dto.UserDTO;
 import io.vertPress.manage.handle.LoginHandler;
 import io.vertPress.manage.utils.AuthUtil;
+import io.vertPress.manage.utils.ResultUtil;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
+/**
+ * @ClassName: LoginHandlerImpl
+ * @Description: TODO 登陆接口实现类
+ * @author FoamValue foamvalue@live.cn
+ * @date 2017年3月29日 下午8:07:46
+ * 
+ */
 public class LoginHandlerImpl implements LoginHandler {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(LoginHandlerImpl.class);
@@ -78,15 +86,15 @@ public class LoginHandlerImpl implements LoginHandler {
 						UserDTO user = res.result();
 						LOGGER.info("userDTO: " + user);
 						if (session != null) {
-							session.put(DEFAULT_USER_SESSION_KEY, user);
+							session.put(ConstantDTO.DEFAULT_USER_SESSION_KEY, user);
 							String returnURL = session.remove(returnURLParam);
 							if (returnURL != null) {
-								doRedirect(req.response(), returnURL);
+								ResultUtil.redirectURL(context.response(), returnURL);
 								return;
 							}
 						}
 						if (directLoggedInOKURL != null) {
-							doRedirect(req.response(), directLoggedInOKURL);
+							ResultUtil.redirectURL(context.response(), directLoggedInOKURL);
 						} else {
 							req.response().end(DEFAULT_DIRECT_LOGGED_IN_OK_PAGE);
 						}
@@ -96,10 +104,6 @@ public class LoginHandlerImpl implements LoginHandler {
 				});
 			}
 		}
-	}
-
-	private void doRedirect(HttpServerResponse response, String url) {
-		response.putHeader("location", url).setStatusCode(302).end();
 	}
 
 	private static final String DEFAULT_DIRECT_LOGGED_IN_OK_PAGE = ""
