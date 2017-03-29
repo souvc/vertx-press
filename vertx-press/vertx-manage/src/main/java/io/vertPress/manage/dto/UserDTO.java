@@ -10,9 +10,8 @@ public class UserDTO implements Serializable {
 
 	private String password;
 
-	public UserDTO(String userName, String password) {
+	public UserDTO(String userName) {
 		this.userName = userName;
-		this.password = password;
 	}
 
 	public String getUserName() {

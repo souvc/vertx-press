@@ -3,7 +3,10 @@ package io.vertPress.manage.init;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.asyncsql.AsyncSQLClient;
+import io.vertx.ext.asyncsql.MySQLClient;
 
 /**
  * @ClassName: DatabaseUtil
@@ -18,7 +21,6 @@ public final class DatabaseUtil {
 
 	public static JsonObject getJsonObject() throws Exception {
 		final JsonObject result = new JsonObject();
-
 		result.put("host", LOADER.getString("vertx.db.host"));
 		result.put("port", LOADER.getInt("vertx.db.port"));
 		result.put("maxPoolSize", LOADER.getInt("vertx.db.max.pool.size"));
@@ -31,7 +33,12 @@ public final class DatabaseUtil {
 	}
 
 	public static Connection getConn() throws Exception {
-		final Connection conn = DriverManager.getConnection(LOADER.getString("vertx.db.url"), LOADER.getString("vertx.db.user"), LOADER.getString("vertx.db.pwd"));
+		final Connection conn = DriverManager.getConnection(LOADER.getString("vertx.db.url"),
+				LOADER.getString("vertx.db.user"), LOADER.getString("vertx.db.pwd"));
 		return conn;
+	}
+
+	public static AsyncSQLClient getClient(Vertx vertx) throws Exception {
+		return MySQLClient.createShared(vertx, DatabaseUtil.getJsonObject());
 	}
 }

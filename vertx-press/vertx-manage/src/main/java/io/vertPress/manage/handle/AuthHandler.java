@@ -1,6 +1,5 @@
 package io.vertPress.manage.handle;
 
-import io.vertPress.manage.handle.impl.AuthHandlerImpl;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
@@ -12,19 +11,6 @@ import io.vertx.ext.web.RoutingContext;
  * 
  */
 public interface AuthHandler extends Handler<RoutingContext> {
-
-	/**
-	 * @Fields DEFAULT_RETURN_URL_PARAM : 默认返回 url
-	 */
-	String DEFAULT_RETURN_URL_PARAM = "return_url";
-
-	static AuthHandler create(String loginRedirectURL) {
-		return new AuthHandlerImpl(loginRedirectURL, DEFAULT_RETURN_URL_PARAM);
-	}
-
-	static AuthHandler create(String loginRedirectURL, String returnURLParam) {
-		return new AuthHandlerImpl(loginRedirectURL, returnURLParam);
-	}
 	
-	
+	final static String DEFAULT_USER_SESSION_KEY = "_vertx_user_key";
 }

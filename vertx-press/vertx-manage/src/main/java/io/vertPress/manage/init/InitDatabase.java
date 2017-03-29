@@ -2,7 +2,6 @@ package io.vertPress.manage.init;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * @ClassName: InitDataBase
@@ -12,7 +11,7 @@ import java.sql.SQLException;
  * 
  */
 public final class InitDatabase {
-
+	
 	/**
 	 * @Fields WP_COMMENTMETA_SQL : TODO 创建 wp_commentmeta 表
 	 */
@@ -99,7 +98,7 @@ public final class InitDatabase {
 	 * @return void
 	 * @throws
 	 */
-	private void executeStatement(String sql) throws SQLException {
+	private void executeStatement(String sql) throws Exception {
 		conn.createStatement().execute(sql);
 	}
 	
@@ -112,8 +111,7 @@ public final class InitDatabase {
 	 * @return ResultSet
 	 * @throws
 	 */
-	private ResultSet queryStatement(String sql) throws SQLException {
+	private ResultSet queryStatement(String sql) throws Exception {
 		return conn.createStatement().executeQuery(sql);
 	}
-
 }

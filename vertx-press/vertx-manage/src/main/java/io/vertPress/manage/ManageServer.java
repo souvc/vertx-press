@@ -1,12 +1,13 @@
 package io.vertPress.manage;
 
-import io.vertPress.manage.handle.AuthHandler;
 import io.vertPress.manage.handle.LoginHandler;
+import io.vertPress.manage.handle.RedirectAuthHandler;
 import io.vertPress.manage.init.InitDatabase;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.SessionHandler;
@@ -26,6 +27,8 @@ public class ManageServer extends AbstractVerticle {
 	 * @Fields LOGGER : 日志对象
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(ManageServer.class);
+	
+	final static String DEFAULT_USER_SESSION_KEY = "_vertx_user_key";
 
 	private final static int SERVER_PORT = 8080;
 
@@ -43,17 +46,17 @@ public class ManageServer extends AbstractVerticle {
 		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
 		// Any requests to URI starting '/manage/' require login
-		router.route("/manage/*").handler(AuthHandler.create("/login.html"));
+		router.route("/manage/*").handler(RedirectAuthHandler.create("/login.html"));
 
 		// Handles the actual login
 		router.route("/login").handler(LoginHandler.create());
 
 		// Handles the actual logout
-	    router.route("/logout").handler(context -> {
-	        context.clearUser();
-	        context.response().putHeader("location", "/login.html").setStatusCode(302).end();
-	      });
-
+		router.route("/logout").handler(context -> {
+			Session session = context.session();
+			session.remove(DEFAULT_USER_SESSION_KEY);
+			context.response().putHeader("location", "/login.html").setStatusCode(302).end();
+		});
 
 		// Serve the static private pages from directory 'webroot'
 		router.route().handler(StaticHandler.create().setCachingEnabled(false).setWebRoot("webroot"));
