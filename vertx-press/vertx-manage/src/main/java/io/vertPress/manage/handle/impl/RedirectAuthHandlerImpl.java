@@ -1,41 +1,47 @@
 package io.vertPress.manage.handle.impl;
 
-import org.apache.commons.lang3.StringUtils;
-
-import io.vertPress.manage.utils.ResultUtil;
+import io.vertPress.manage.dto.ConstantDTO;
+import io.vertPress.manage.dto.UserDTO;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 
 /**
  * @ClassName: RedirectAuthHandlerImpl
- * @Description: TODO 权限跳转接口实现类
+ * @Description: TODO 请求跳转接口实现类
  * @author FoamValue foamvalue@live.cn
- * @date 2017年3月15日 下午4:26:42
+ * @date 2017年3月29日 下午8:37:59
  * 
  */
 public class RedirectAuthHandlerImpl extends AuthHandlerImpl {
-
 	
+	private final static Logger LOGGER = LoggerFactory.getLogger(RedirectAuthHandlerImpl.class);
 
 	private final String loginRedirectURL;
 
-	public RedirectAuthHandlerImpl(String loginRedirectURL) {
+	private final String returnURLParam;
+
+	public RedirectAuthHandlerImpl(String loginRedirectURL, String returnURLParam) {
 		this.loginRedirectURL = loginRedirectURL;
+		this.returnURLParam = returnURLParam;
 	}
 
 	@Override
-	public void handle(RoutingContext event) {
-		Session session = event.session();
+	public void handle(RoutingContext context) {
+		Session session = context.session();
 		if (session != null) {
-			String userNo = session.get("userNo");
-			if (StringUtils.isNotBlank(userNo)) {
-				event.next();
+			UserDTO user = session.get(ConstantDTO.DEFAULT_USER_SESSION_KEY);
+			LOGGER.info("userDTO: " + user);
+			if (user != null) {
+				context.next();
 			} else {
-				ResultUtil.redirectURL(event, loginRedirectURL);
+				session.put(returnURLParam, context.request().uri());
+				context.response().putHeader("location", loginRedirectURL).setStatusCode(302).end();
 			}
 		} else {
-			event.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
+			context.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
 		}
-	}
 
+	}
 }
