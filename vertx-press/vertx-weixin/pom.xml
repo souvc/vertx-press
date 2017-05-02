@@ -1,0 +1,107 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.vertx-press</groupId>
+		<artifactId>vertx-press</artifactId>
+		<version>0.0.1</version>
+	</parent>
+	<artifactId>vertx-weixin</artifactId>
+	<name>vertx-weixin</name>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-web-templ-freemarker</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-service-discovery</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.vertx</groupId>
+			<artifactId>vertx-unit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<resource.filter>dev.properties</resource.filter>
+			</properties>
+		</profile>
+		<profile>
+			<id>product</id>
+			<properties>
+				<resource.filter>product.properties</resource.filter>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<filters>
+			<filter>${resource.filter}</filter>
+		</filters>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>io.vertPress.weixin.WeixinServer</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
