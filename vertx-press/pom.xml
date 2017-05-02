@@ -146,5 +146,6 @@
 	<modules>
 		<module>vertx-manage</module>
 		<module>vertx-weixin</module>
+		<module>vertx-other</module>
 	</modules>
 </project>
