@@ -113,6 +113,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>6.0.6</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>3.5</version>
@@ -123,10 +129,11 @@
 				<version>1.10</version>
 			</dependency>
 			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>6.0.6</version>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.8.0</version>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -147,5 +154,6 @@
 		<module>vertx-manage</module>
 		<module>vertx-weixin</module>
 		<module>vertx-other</module>
+		<module>vertx-com</module>
 	</modules>
 </project>
