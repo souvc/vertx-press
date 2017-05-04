@@ -1,14 +1,11 @@
 package io.vertPress.other.handler.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import io.vertPress.com.utils.HttpUtil;
 import io.vertPress.com.utils.JsonUtil;
+import io.vertPress.other.dto.QuoteDTO;
 import io.vertPress.other.handler.QuoteHandler;
+import io.vertPress.other.utils.QuoteUtil;
 import io.vertPress.other.utils.ResourceUtil;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.logging.Logger;
@@ -26,8 +23,6 @@ public class QuoteHandlerImpl implements QuoteHandler {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(QuoteHandlerImpl.class);
 
-	private final static String requestMethod = "GET";
-
 	private final static ResourceUtil util = ResourceUtil.getInstance();
 
 	@Override
@@ -44,26 +39,20 @@ public class QuoteHandlerImpl implements QuoteHandler {
 
 		LOGGER.debug("productName:" + productName + ",productModel:" + productModel + ", productBrand:" + productBrand);
 
+		QuoteDTO dto = new QuoteDTO();
+		
 		// JD
 		String jdSearchUrl = util.getString("jd.search");
 		if (StringUtils.isNotBlank(jdSearchUrl)) {
 			jdSearchUrl = jdSearchUrl.replace("PRODUCTNAME", productName);
 			jdSearchUrl = jdSearchUrl.replace("PRODUCTMODEL", productModel);
 			jdSearchUrl = jdSearchUrl.replace("PRODUCTBRAND", productBrand);
-			LOGGER.debug(JsonUtil.toJson(jdSearchUrl));
-			Document jdSearch = Jsoup.parse(HttpUtil.httpsRequest(jdSearchUrl, requestMethod, null));
-			LOGGER.debug(JsonUtil.toJson(jdSearch));
-			if (jdSearch != null) {
-				Element content = jdSearch.getElementById("J_goodsList");
-				LOGGER.debug(JsonUtil.toJson(content));
-				Element li = content.getElementsByTag("li").get(0);
-				LOGGER.debug(JsonUtil.toJson(li));
-			}
+			dto.setJdPrice(Double.valueOf(QuoteUtil.getJDPrice(jdSearchUrl)));
 		}
 
 		HttpServerResponse response = event.response();
 		response.putHeader("content-type", "text/plain");
-		response.end("null");
+		response.end(JsonUtil.toJson(dto));
 
 	}
 
