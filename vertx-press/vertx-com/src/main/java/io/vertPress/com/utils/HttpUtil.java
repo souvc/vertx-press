@@ -13,6 +13,7 @@ import java.security.SecureRandom;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 public class HttpUtil {
 
@@ -36,6 +37,8 @@ public class HttpUtil {
 			httpUrlConn.setRequestMethod(requestMethod);
 
 			if ("GET".equalsIgnoreCase(requestMethod)) {
+				httpUrlConn.addRequestProperty("Accept-Charset", "UTF-8;");  
+				httpUrlConn.addRequestProperty("User-Agent","Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.8) Firefox/3.6.8");  
 				httpUrlConn.connect();
 			}
 
@@ -91,8 +94,9 @@ public class HttpUtil {
 		InputStreamReader inputStreamReader = null;
 		InputStream inputStream = null;
 		try {
+			TrustManager[] tm = { new MyX509TrustManager() };
 			SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
-			sslContext.init(null, null, new SecureRandom());
+			sslContext.init(null, tm, new SecureRandom());
 
 			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
@@ -125,7 +129,6 @@ public class HttpUtil {
 			while ((str = bufferedReader.readLine()) != null) {
 				buffer.append(str);
 			}
-			httpUrlConn.disconnect();
 		} catch (ConnectException ce) {
 			ce.printStackTrace();
 		} catch (Exception e) {

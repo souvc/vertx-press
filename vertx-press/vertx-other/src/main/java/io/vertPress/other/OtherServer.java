@@ -30,14 +30,14 @@ public class OtherServer extends AbstractVerticle {
 		// 主路由
 		Router router = Router.router(vertx);
 
+		// 获取报价
+		router.get("/getPrice").handler(QuoteHandler.getPrice());
+
 		router.route().handler(routingContext -> {
 			HttpServerResponse response = routingContext.response();
 			response.putHeader("content-type", "text/plain");
 			response.end("Hello World from Vert.x-Web!");
 		});
-
-		// 获取报价
-		router.get("/getPrice").handler(QuoteHandler.getPrice());
 
 		router.route().handler(StaticHandler.create());
 		LOGGER.debug("Other is running.");
