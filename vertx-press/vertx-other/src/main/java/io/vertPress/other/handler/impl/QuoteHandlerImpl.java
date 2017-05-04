@@ -49,6 +49,15 @@ public class QuoteHandlerImpl implements QuoteHandler {
 			jdSearchUrl = jdSearchUrl.replace("PRODUCTBRAND", productBrand);
 			dto.setJdPrice(Double.valueOf(QuoteUtil.getJDPrice(jdSearchUrl)));
 		}
+		
+		// STAPLES
+		String staplesSearchUrl = util.getString("staples.search");
+		if (StringUtils.isNotBlank(staplesSearchUrl)) {
+			staplesSearchUrl = staplesSearchUrl.replace("PRODUCTNAME", productName);
+			staplesSearchUrl = staplesSearchUrl.replace("PRODUCTMODEL", productModel);
+			staplesSearchUrl = staplesSearchUrl.replace("PRODUCTBRAND", productBrand);
+			dto.setStaplesPrice(Double.valueOf(QuoteUtil.getStaples(staplesSearchUrl).replaceAll(",", "")));
+		}
 
 		HttpServerResponse response = event.response();
 		response.putHeader("content-type", "text/plain");

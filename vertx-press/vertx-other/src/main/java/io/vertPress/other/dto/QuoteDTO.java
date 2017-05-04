@@ -18,12 +18,22 @@ public class QuoteDTO implements Serializable {
 
 	public Double jdPrice;
 
+	public Double staplesPrice;
+
 	public Double getJdPrice() {
 		return jdPrice;
 	}
 
 	public void setJdPrice(Double jdPrice) {
 		this.jdPrice = jdPrice;
+	}
+
+	public Double getStaplesPrice() {
+		return staplesPrice;
+	}
+
+	public void setStaplesPrice(Double staplesPrice) {
+		this.staplesPrice = staplesPrice;
 	}
 
 	public static long getSerialversionuid() {
