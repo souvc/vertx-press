@@ -69,6 +69,12 @@
 				<resource.filter>dev.properties</resource.filter>
 			</properties>
 		</profile>
+		<profile>
+			<id>product</id>
+			<properties>
+				<resource.filter>product.properties</resource.filter>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
