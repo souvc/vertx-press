@@ -3,6 +3,7 @@ package io.vertPress.weixin;
 import io.vertPress.weixin.handle.GetHandler;
 import io.vertPress.weixin.handle.PostHandler;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
@@ -32,8 +33,13 @@ public class WeixinServer extends AbstractVerticle {
 		
 		router.get().handler(GetHandler.create());
 		router.post().handler(PostHandler.create());
-		
 		router.route().handler(StaticHandler.create());
+		
+		router.route().handler(routingContext -> {
+			HttpServerResponse response = routingContext.response();
+			response.putHeader("content-type", "text/plain");
+			response.end("Hello World from Vert.x-Web!");
+		});
 		
 		LOGGER.debug("Weixin is running.");
 		vertx.createHttpServer().requestHandler(router::accept).listen(SERVER_PORT);
